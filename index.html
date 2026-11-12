@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173b63">
+<title>الجوكر 2000 | دفتر الحسابات</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--navy:#173b63;--blue:#245b8f;--bg:#f3f6fa;--ink:#172334;--muted:#66758a;--line:#e3e9f0;--green:#16845b;--red:#c34444;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:11px 15px;background:var(--navy);color:white}
+button.secondary{background:#eaf0f6;color:var(--navy)}button.danger{background:#fff0f0;color:var(--red)}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;background:white;color:var(--ink)}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}.field{margin-bottom:12px}
+header{background:var(--navy);color:white;padding:17px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header h1{font-size:20px;margin:0}header small{color:#d6e4f2}
+.wrap{max-width:1150px;margin:22px auto;padding:0 16px}.hidden{display:none!important}
+.login{max-width:430px;margin:8vh auto;background:white;padding:25px;border-radius:18px;box-shadow:0 10px 35px #18324d12}
+.login h2{margin-top:0;color:var(--navy)}.notice{background:#fff7df;border:1px solid #f1dfaa;color:#725716;padding:12px;border-radius:10px;font-size:13px;line-height:1.7;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat,.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:16px}
+.stat span{font-size:13px;color:var(--muted)}.stat strong{display:block;font-size:24px;margin-top:9px}.stat.red strong{color:var(--red)}.stat.green strong{color:var(--green)}
+.tabs{display:flex;gap:8px;overflow:auto;margin:18px 0}.tabs button{white-space:nowrap}.tabs button.active{background:var(--blue)}
+.panel{margin-bottom:15px}.panel h2{font-size:17px;margin:0 0 15px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:right;padding:12px 9px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:600;background:#f9fbfd}
+.tablewrap{overflow:auto}.positive{color:var(--red);font-weight:bold}.negative{color:var(--green);font-weight:bold}
+.customer{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}
+.customer:last-child{border:0}.customer b{display:block;margin-bottom:5px}.muted{color:var(--muted);font-size:13px}
+.empty{text-align:center;color:var(--muted);padding:25px}
+.modal{position:fixed;inset:0;background:#101c2dcc;display:grid;place-items:center;padding:16px;z-index:5}.modalbox{background:white;border-radius:16px;padding:20px;width:min(520px,100%);max-height:90vh;overflow:auto}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:20px}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr}.wrap{margin:14px auto}header h1{font-size:17px}.stat strong{font-size:20px}}
+@media print{header,.tabs,.toolbar button,.no-print,footer{display:none!important}body{background:white}.wrap{margin:0;max-width:none}.panel,.stat{border:0}}
+</style>
+</head>
+<body>
+<header><div><h1>الجوكر 2000</h1><small>دفتر الحسابات</small></div><div id="userArea" class="hidden"><small id="userEmail"></small> <button class="secondary" id="logoutBtn">خروج</button></div></header>
+
+<section id="loginView" class="login">
+<h2>تسجيل الدخول</h2>
+<div class="notice">هذه نسخة تشغيل أولية مرتبطة بقاعدة بيانات سحابية. يلزم إعداد مشروع Supabase وإضافة مفاتيحه قبل الاستخدام الفعلي.</div>
+<div class="field"><label>البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" placeholder="name@example.com"></div>
+<div class="field"><label>كلمة المرور</label><input id="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+<div class="actions"><button id="loginBtn">دخول</button><button class="secondary" id="signupBtn">إنشاء حساب</button></div>
+<p id="loginMsg" class="muted"></p>
+</section>
+
+<main id="appView" class="wrap hidden">
+<div class="grid">
+<div class="stat"><span>إجمالي مديونيات التجار</span><strong id="totalDebt">0 ج.م</strong></div>
+<div class="stat green"><span>إجمالي التحصيلات</span><strong id="totalPaid">0 ج.م</strong></div>
+<div class="stat"><span>عدد التجار</span><strong id="customerCount">0</strong></div>
+<div class="stat red"><span>صافي المستحق</span><strong id="netDue">0 ج.م</strong></div>
+</div>
+<nav class="tabs no-print">
+<button class="active" data-tab="customers">التجار</button><button data-tab="ledger">كشف الحساب</button><button data-tab="reports">التقارير</button><button data-tab="users">المستخدمون</button>
+</nav>
+<section id="customersTab" class="panel">
+<div class="toolbar"><h2>دفاتر التجار</h2><div class="actions"><input id="customerSearch" placeholder="ابحث باسم التاجر أو الهاتف" style="width:220px"><button id="addCustomerBtn">+ إضافة تاجر</button></div></div>
+<div id="customerList"></div>
+</section>
+<section id="ledgerTab" class="panel hidden">
+<div class="toolbar"><div><h2 id="ledgerTitle">كشف الحساب</h2><div class="muted" id="ledgerPhone"></div></div><div class="actions"><button id="addTransactionBtn">+ إضافة عملية</button><button class="secondary" id="printBtn">طباعة / PDF</button></div></div>
+<div class="grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:15px">
+<div class="stat"><span>رصيد أول المدة</span><strong id="openingBalance">0</strong></div>
+<div class="stat"><span>إجمالي المبيعات والزيادات</span><strong id="ledgerDebit">0</strong></div>
+<div class="stat green"><span>إجمالي المدفوعات</span><strong id="ledgerCredit">0</strong></div>
+</div>
+<div class="stat" style="margin-bottom:15px"><span>الرصيد الحالي المستحق</span><strong id="ledgerBalance">0 ج.م</strong></div>
+<div class="tablewrap"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>البيان</th><th>مدين</th><th>دائن</th><th>الرصيد</th></tr></thead><tbody id="transactionRows"></tbody></table></div>
+</section>
+<section id="reportsTab" class="panel hidden"><h2>التقارير</h2><p>إجمالي أرصدة التجار والتحصيلات حسب البيانات المسجلة.</p><div id="reportSummary"></div><button class="secondary" onclick="window.print()">طباعة التقرير / حفظ PDF</button></section>
+<section id="usersTab" class="panel hidden"><h2>المستخدمون والصلاحيات</h2><p>يمكن للمدير والمحاسب إضافة المستخدمين عبر إنشاء حساب من شاشة الدخول. تعيين الدور يتم من لوحة Supabase حسب تعليمات ملف الإعداد.</p><div id="roleInfo" class="notice">الأدوار: مدير، محاسب، مستخدم. صلاحيات قاعدة البيانات محمية بسياسات RLS.</div></section>
+</main>
+<div id="modal" class="modal hidden"><div class="modalbox"><div class="toolbar"><h2 id="modalTitle">إضافة</h2><button class="secondary" id="closeModal">إغلاق</button></div><div id="modalBody"></div></div></div>
+<footer>مصنع الجوكر 2000 · دفتر الحسابات · نسخة أولية</footer>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat('ar-EG',{maximumFractionDigits:2}).format(Number(n||0))+' ج.م';
+const client=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let customers=[],transactions=[],selected=null,profile=null;
+const msg=(s)=>$('loginMsg').textContent=s;
+function showLogin(){ $('loginView').classList.remove('hidden');$('appView').classList.add('hidden');$('userArea').classList.add('hidden');}
+function showApp(user){$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('userArea').classList.remove('hidden');$('userEmail').textContent=user.email;}
+async function loadProfile(){const {data:{user}}=await client.auth.getUser();if(!user)return;const {data}=await client.from('profiles').select('*').eq('id',user.id).single();profile=data;}
+async function loadData(){
+ const [c,t]=await Promise.all([client.from('customers').select('*').order('name'),client.from('transactions').select('*').order('transaction_date').order('created_at')]);
+ if(c.error||t.error)throw(c.error||t.error);customers=c.data||[];transactions=t.data||[];render();
+}
+function txFor(id){return transactions.filter(t=>t.customer_id===id).sort((a,b)=>a.transaction_date.localeCompare(b.transaction_date)||a.created_at.localeCompare(b.created_at));}
+function balance(id){const c=customers.find(x=>x.id===id);return Number(c?.opening_balance||0)+txFor(id).reduce((s,t)=>s+Number(t.debit||0)-Number(t.credit||0),0);}
+function render(){
+ const total=customers.reduce((s,c)=>s+balance(c.id),0),paid=transactions.reduce((s,t)=>s+Number(t.credit||0),0);
+ $('totalDebt').textContent=money(total);$('totalPaid').textContent=money(paid);$('customerCount').textContent=customers.length;$('netDue').textContent=money(total);
+ const q=$('customerSearch').value.trim().toLowerCase();
+ $('customerList').innerHTML=customers.filter(c=>(c.name+' '+(c.phone||'')).toLowerCase().includes(q)).map(c=>`<div class="customer"><div><b>${esc(c.name)}</b><span class="muted">${esc(c.phone||'بدون هاتف')} · ${esc(c.notes||'')}</span></div><div class="actions"><b class="${balance(c.id)>0?'positive':'negative'}">${money(balance(c.id))}</b><button data-open="${c.id}">فتح الدفتر</button></div></div>`).join('')||'<div class="empty">لا يوجد تجار بعد. أضف أول تاجر للبدء.</div>';
+ $('reportSummary').innerHTML=`<p>عدد التجار: <b>${customers.length}</b></p><p>إجمالي الأرصدة المستحقة: <b>${money(total)}</b></p><p>إجمالي التحصيلات المسجلة: <b>${money(paid)}</b></p>`;
+ document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openLedger(b.dataset.open));
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function tab(name){document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['customers','ledger','reports','users'].forEach(n=>$(n+'Tab').classList.toggle('hidden',n!==name));}
+function modal(title,html){$('modalTitle').textContent=title;$('modalBody').innerHTML=html;$('modal').classList.remove('hidden');}
+function closeModal(){$('modal').classList.add('hidden');}
+function openLedger(id){
+ selected=customers.find(c=>c.id===id);if(!selected)return;tab('ledger');
+ $('ledgerTitle').textContent='كشف حساب: '+selected.name;$('ledgerPhone').textContent=selected.phone||'';
+ $('openingBalance').textContent=money(selected.opening_balance);let debit=0,credit=0,run=Number(selected.opening_balance||0);
+ const rows=txFor(id).map(t=>{debit+=Number(t.debit||0);credit+=Number(t.credit||0);run+=Number(t.debit||0)-Number(t.credit||0);return `<tr><td>${esc(t.transaction_date)}</td><td>${esc(t.kind)}</td><td>${esc(t.description||'')}</td><td>${money(t.debit)}</td><td>${money(t.credit)}</td><td>${money(run)}</td></tr>`;}).join('');
+ $('ledgerDebit').textContent=money(debit);$('ledgerCredit').textContent=money(credit);$('ledgerBalance').textContent=money(balance(id));$('transactionRows').innerHTML=rows||'<tr><td colspan="6" class="empty">لا توجد معاملات مسجلة</td></tr>';
+}
+$('addCustomerBtn').onclick=()=>{modal('إضافة تاجر',`<form id="customerForm"><div class="field"><label>اسم التاجر *</label><input name="name" required></div><div class="row"><div class="field"><label>رقم الهاتف</label><input name="phone"></div><div class="field"><label>رصيد أول المدة (ج.م)</label><input name="opening_balance" type="number" step=".01" value="0"></div></div><div class="field"><label>ملاحظات</label><textarea name="notes"></textarea></div><button>حفظ التاجر</button></form>`);
+ $('customerForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);const {error}=await client.from('customers').insert({name:f.get('name'),phone:f.get('phone'),opening_balance:Number(f.get('opening_balance')||0),notes:f.get('notes')});if(error)return alert(error.message);closeModal();await loadData();};
+};
+$('addTransactionBtn').onclick=()=>{if(!selected)return;modal('إضافة عملية للتاجر',`<form id="txForm"><div class="field"><label>نوع العملية</label><select name="kind"><option>بيع عبايات</option><option>بيع إسدالات</option><option>بيع منتجات أخرى</option><option>تحصيل نقدي</option><option>خصم</option><option>مديونية إضافية</option><option>مرتجع</option></select></div><div class="row"><div class="field"><label>المبلغ (ج.م) *</label><input name="amount" type="number" min=".01" step=".01" required></div><div class="field"><label>التاريخ</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}" required></div></div><div class="field"><label>البيان / رقم الفاتورة</label><textarea name="description"></textarea></div><button>حفظ العملية</button></form>`);
+ $('txForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),kind=f.get('kind'),amount=Number(f.get('amount'));let debit=0,credit=0;if(['تحصيل نقدي','خصم','مرتجع'].includes(kind))credit=amount;else debit=amount;const {error}=await client.from('transactions').insert({customer_id:selected.id,kind,debit,credit,transaction_date:f.get('date'),description:f.get('description')});if(error)return alert(error.message);closeModal();await loadData();openLedger(selected.id);};
+};
+$('closeModal').onclick=closeModal;$('modal').onclick=e=>{if(e.target===$('modal'))closeModal();};
+$('printBtn').onclick=()=>window.print();$('customerSearch').oninput=render;
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+$('loginBtn').onclick=async()=>{const {error}=await client.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)return msg(error.message);await boot();};
+$('signupBtn').onclick=async()=>{const {data,error}=await client.auth.signUp({email:$('email').value,password:$('password').value});if(error)return msg(error.message);msg(data.session?'تم إنشاء الحساب':'تم إرسال رسالة تأكيد البريد الإلكتروني إذا كان التأكيد مفعلاً.');};
+$('logoutBtn').onclick=async()=>{await client.auth.signOut();showLogin();};
+async function boot(){try{const {data:{user}}=await client.auth.getUser();if(!user)return showLogin();showApp(user);await loadProfile();await loadData();}catch(e){alert('تعذر تحميل البيانات: '+e.message);}}
+client.auth.onAuthStateChange((_event,session)=>{if(!session)showLogin();});
+boot();
+</script>
+</body></html>
