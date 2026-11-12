@@ -118,7 +118,7 @@ const sum=(L,k)=>L.reduce((a,p)=>a+stats(p.id)[k],0);
 
 function dueInfo(d){const days=Math.round((new Date(d+'T00:00:00')-new Date(new Date().toDateString()))/864e5);return days<0?`<span class="late">متأخر ${fm.format(-days)} يوم</span>`:days===0?'<span class="soon">اليوم</span>':`<span class="${days<=7?'soon':''}">بعد ${fm.format(days)} يوم</span>`}
 const bt=(st,i,l,c='secondary')=>`<button class="${c} sm" data-st="${st}" data-id="${i}">${l}</button> `;
-const actFor=(t,sp)=>{const i=t.id,s=t.cheque_status;if(s==='endorsed')return'';const done=bt('cleared',i,sp?'تم الصرف':'تم التحصيل','ok')+bt('bounced',i,'مرتد','danger');
+const actFor=(t,sp)=>{const i=t.id,s=t.cheque_status;if(s==='endorsed')return`<button class="danger sm" data-unend="${i}">رفض المورد</button>`;const done=bt('cleared',i,sp?'تم الصرف':'تم التحصيل','ok')+bt('bounced',i,'مرتد','danger');
  if(s==='pending')return(sp?'':bt('deposited',i,'إيداع بالبنك')+`<button class="secondary sm" data-end="${i}">تظهير لمورد</button> `)+done;
  if(s==='deposited')return done+bt('pending',i,'إرجاع للحافظة');return bt('pending',i,sp?'إعادة للانتظار':'إعادة للحافظة')};
 function chqTable(rows,actions,showParty=true){
@@ -188,6 +188,13 @@ function editParty(id){const p=party(id);if(!p)return;modal(isSup(p)?'تعديل
  $('ep').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);save(client.from('customers').update({name:f.get('name'),phone:f.get('phone'),opening_balance:N(f.get('ob')),notes:f.get('notes')}).eq('id',id)).then(ok=>ok&&toast('تم التعديل'))}}
 async function delParty(id){const p=party(id),n=txFor(id).length;if(!p||!confirm(`حذف "${p.name}" نهائياً؟${n?`\nسيتم أيضاً حذف ${n} عملية مسجلة عليه.`:''}\nلا يمكن التراجع.`))return;
  const {error}=await client.from('customers').delete().eq('id',id);if(error)return alert(error.message);if(selected?.id===id)selected=null;await loadData();tab(isSup(p)?'suppliers':'customers');toast('تم الحذف')}
+async function unendorse(id){const t=tx.find(x=>x.id===id);if(!t)return;
+ const tsup=isSup(party(t.customer_id)),other=tx.find(x=>x.id!==t.id&&x.cheque_status==='endorsed'&&x.cheque_no===t.cheque_no&&N(x.credit)===N(t.credit)&&x.cheque_due_date===t.cheque_due_date&&isSup(party(x.customer_id))!==tsup);
+ const sup=tsup?t:other,cu=tsup?other:t;if(!cu)return alert('لم يتم العثور على الشيك الأصلي عند التاجر.');
+ if(!confirm(`رفض المورد للشيك رقم ${t.cheque_no}؟\nسيعود الشيك إلى حافظة الخزينة، ويعود المبلغ مستحقاً على المورد.`))return;
+ if(sup){const a=await client.from('transactions').update({cheque_status:'bounced',description:((sup.description||'')+' — رفضه المورد').trim()}).eq('id',sup.id);if(a.error)return alert(a.error.message)}
+ const b=await client.from('transactions').update({cheque_status:'pending'}).eq('id',cu.id);if(b.error)return alert(b.error.message);
+ await loadData();toast('رجع الشيك إلى حافظة الخزينة')}
 function tab(n){$('tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.tab===n));TABS.forEach(([k])=>$(k+'Tab').classList.toggle('hidden',k!==n))}
 $('tabs').innerHTML=TABS.map(([k,l])=>`<button data-tab="${k}">${l}</button>`).join('');
 const modal=(t,h)=>{$('modalTitle').textContent=t;$('modalBody').innerHTML=h;$('modal').classList.remove('hidden')},closeModal=()=>$('modal').classList.add('hidden');
@@ -216,7 +223,7 @@ function payment(){const sp=isSup(selected);
   save(client.from('transactions').insert(rows)).then(ok=>ok&&toast('تم تسجيل الدفعة'))}}
 
 document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
- if(d.tab)tab(d.tab);else if(d.open)openLedger(d.open);else if(d.add)addParty(d.add);else if(d.edit)editParty(d.edit);else if(d.pdel)delParty(d.pdel);else if(d.end)endorse(d.end);else if(d.cash)cashForm();
+ if(d.tab)tab(d.tab);else if(d.open)openLedger(d.open);else if(d.add)addParty(d.add);else if(d.unend)unendorse(d.unend);else if(d.edit)editParty(d.edit);else if(d.pdel)delParty(d.pdel);else if(d.end)endorse(d.end);else if(d.cash)cashForm();
  else if(d.cdel&&confirm('حذف هذه الحركة؟')){const {error}=await client.from('cash_entries').delete().eq('id',d.cdel);if(error)return alert(error.message);await loadData();toast('تم الحذف')}
  else if(d.st){const {error}=await client.from('transactions').update({cheque_status:d.st}).eq('id',d.id);if(error)return alert(error.message);await loadData();toast('تم تحديث حالة الشيك')}
  else if(d.del&&confirm('حذف هذه العملية نهائياً؟')){const {error}=await client.from('transactions').delete().eq('id',d.del);if(error)return alert(error.message);await loadData();toast('تم الحذف')}});
