@@ -41,6 +41,7 @@ th{color:var(--muted);font-weight:600;background:#f8f9fb;white-space:nowrap}td.n
 .trend{display:flex;gap:10px;align-items:flex-end;margin-bottom:6px}.tcol{flex:1;text-align:center}.bars{height:110px;display:flex;align-items:flex-end;justify-content:center;gap:3px}
 .bi,.be{display:block;width:40%;max-width:18px;border-radius:3px 3px 0 0;min-height:2px}.bi{background:var(--green)}.be{background:var(--red)}.lg{display:inline-block;width:10px;height:10px;border-radius:2px;margin-inline:4px}
 .cb{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:center;margin-bottom:8px;font-size:14px}.cb div{background:#eef1f5;border-radius:4px;height:8px}.cb i{display:block;height:100%;background:var(--brass);border-radius:4px}
+.b-deposited{background:#e3edf8;color:var(--blue)}.b-endorsed{background:#ece8f6;color:#5b3f9a}
 .printhead{display:none}footer{color:var(--muted);font-size:12px;text-align:center;padding:20px}body.ro .w{display:none!important}
 @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr}.stat strong{font-size:18px}header h1{font-size:17px}}
 @media print{header,.tabs,.no-print,footer,.w{display:none!important}body{background:#fff}.wrap{margin:0;max-width:none}.panel,.stat{border:1px solid #ccc}.printhead{display:block;text-align:center;margin-bottom:12px}}
@@ -68,7 +69,8 @@ th{color:var(--muted);font-weight:600;background:#f8f9fb;white-space:nowrap}td.n
 <section id="customersTab" class="panel hidden"><div class="toolbar"><h2>دفاتر التجار</h2><div class="actions"><input id="customerSearch" placeholder="ابحث بالاسم أو الهاتف" style="width:210px"><button class="w" data-add="customer">+ إضافة تاجر</button></div></div><div id="customerList"></div></section>
 <section id="suppliersTab" class="panel hidden"><div class="toolbar"><h2>دفاتر الموردين</h2><div class="actions"><input id="supplierSearch" placeholder="ابحث بالاسم أو الهاتف" style="width:210px"><button class="w" data-add="supplier">+ إضافة مورد</button></div></div><div id="supplierList"></div></section>
 
-<section id="chequesTab" class="panel hidden"><div class="toolbar"><h2>الشيكات</h2><div class="actions"><select id="chqType" style="width:auto"><option value="">الكل</option><option value="customer">شيكات التجار (واردة)</option><option value="supplier">شيكات الموردين (صادرة)</option></select><select id="chqStatus" style="width:auto"><option value="pending">تحت التحصيل / الصرف</option><option value="">كل الحالات</option><option value="cleared">تم</option><option value="bounced">مرتدة</option></select></div></div><div class="grid" id="chqStats"></div><div class="tablewrap" id="chqTable"></div></section>
+<section id="portfolioTab" class="panel hidden"><div class="toolbar"><h2>حافظة الشيكات</h2><span class="muted">شيكات التجار الموجودة في الخزينة ولم تُودع بعد</span></div><div class="grid" id="pfStats"></div><div id="pfBody"></div></section>
+<section id="chequesTab" class="panel hidden"><div class="toolbar"><h2>الشيكات</h2><div class="actions"><select id="chqType" style="width:auto"><option value="">الكل</option><option value="customer">شيكات التجار (واردة)</option><option value="supplier">شيكات الموردين (صادرة)</option></select><select id="chqStatus" style="width:auto"><option value="open">تحت التحصيل / الصرف</option><option value="">كل الحالات</option><option value="deposited">مودعة بالبنك</option><option value="endorsed">مظهّرة</option><option value="cleared">تم</option><option value="bounced">مرتدة</option></select></div></div><div class="grid" id="chqStats"></div><div class="tablewrap" id="chqTable"></div></section>
 
 <section id="cashTab" class="panel hidden"><div class="toolbar"><h2>الدخل والمصروف</h2><div class="actions"><input type="month" id="cashMonth" style="width:auto"><button class="w" data-cash="1">+ إضافة حركة</button></div></div><div class="grid" id="cashStats"></div>
 <div class="row"><div><h3 style="margin-top:0">آخر ٦ أشهر</h3><div class="trend" id="cashTrend"></div><div class="muted"><i class="lg" style="background:var(--green)"></i>دخل <i class="lg" style="background:var(--red)"></i>مصروف</div></div><div><h3 style="margin-top:0">المصروفات حسب التصنيف</h3><div id="cashCats"></div></div></div>
@@ -76,7 +78,7 @@ th{color:var(--muted);font-weight:600;background:#f8f9fb;white-space:nowrap}td.n
 <section id="ledgerTab" class="panel hidden">
 <div class="printhead"><h2>مصنع الجوكر 2000</h2><div id="printTitle"></div></div>
 <div class="toolbar"><div><h2 id="ledgerTitle">كشف الحساب</h2><div class="muted" id="ledgerPhone"></div></div>
-<div class="actions no-print"><button class="w" id="bInv"></button><button class="w" id="bPay"></button><button class="w secondary" id="bRet">+ مرتجع</button><button class="w secondary" id="bDisc">+ خصم</button><button class="secondary" id="printBtn">طباعة / PDF</button></div></div>
+<div class="actions no-print"><button class="w" id="bInv"></button><button class="w" id="bPay"></button><button class="w secondary" id="bRet">+ مرتجع</button><button class="w secondary" id="bDisc">+ خصم</button><button class="w secondary" id="bEdit">تعديل البيانات</button><button class="danger" id="bDelP">حذف</button><button class="secondary" id="printBtn">طباعة / PDF</button></div></div>
 <div class="grid" id="ledgerStats"></div>
 <div class="tablewrap"><table><thead><tr><th>التاريخ</th><th>البيان</th><th>مدين</th><th>مدفوع</th><th>مرتجع</th><th>خصم</th><th>الرصيد</th><th class="w"></th></tr></thead><tbody id="txRows"></tbody></table></div>
 <h3>الشيكات في هذا الحساب</h3><div class="tablewrap" id="ledgerCheques"></div>
@@ -98,42 +100,47 @@ const fd=d=>d?new Date(d+'T00:00:00').toLocaleDateString('ar-EG'):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const client=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const METHODS={cash:'نقدي',vodafone_cash:'فودافون كاش',cheque:'شيك',bank_transfer:'تحويل بنكي / إنستاباي'};
-const ST={pending:'تحت التحصيل',cleared:'تم التحصيل',bounced:'مرتد'},STS={pending:'مستحق الصرف',cleared:'تم الصرف',bounced:'مرتد'};
-const TABS=[['overview','نظرة عامة'],['customers','التجار'],['suppliers','الموردون'],['cheques','الشيكات'],['cash','الدخل والمصروف'],['ledger','كشف الحساب'],['reports','التقارير'],['users','المستخدمون']];
+const ST={pending:'في الخزينة',deposited:'مودع بالبنك',endorsed:'مظهّر لمورد',cleared:'تم التحصيل',bounced:'مرتد'},STS={pending:'مستحق الصرف',deposited:'مودع بالبنك',endorsed:'مظهّر من تاجر',cleared:'تم الصرف',bounced:'مرتد'};
+const TABS=[['overview','نظرة عامة'],['customers','التجار'],['suppliers','الموردون'],['portfolio','حافظة الشيكات'],['cheques','الشيكات'],['cash','الدخل والمصروف'],['ledger','كشف الحساب'],['reports','التقارير'],['users','المستخدمون']];
 let cash=[],parties=[],tx=[],selected=null,profile=null;
 const canW=()=>['owner','accountant'].includes(profile?.role),isOwner=()=>profile?.role==='owner';
 const party=id=>parties.find(p=>p.id===id),isSup=p=>p?.party_type==='supplier';
 const txFor=id=>tx.filter(t=>t.customer_id===id);
+const OPEN=t=>['pending','deposited'].includes(t.cheque_status);
 const eff=t=>t.cheque_status==='bounced'?0:N(t.credit);
 const cat=t=>N(t.debit)>0?'debit':t.kind.includes('مرتجع')?'ret':t.kind.includes('خصم')?'disc':'pay';
 function stats(id){const p=party(id),s={open:N(p?.opening_balance),debit:0,pay:0,ret:0,disc:0,pending:0,m:{cash:0,vodafone_cash:0,cheque:0,bank_transfer:0}};
- txFor(id).forEach(t=>{const k=cat(t);if(k==='debit')s.debit+=N(t.debit);else{const v=eff(t);s[k]+=v;if(k==='pay'){s.m[t.payment_method||'cash']+=v;if(t.cheque_status==='pending')s.pending+=v}}});
+ txFor(id).forEach(t=>{const k=cat(t);if(k==='debit')s.debit+=N(t.debit);else{const v=eff(t);s[k]+=v;if(k==='pay'){s.m[t.payment_method||'cash']+=v;if(OPEN(t))s.pending+=v}}});
  s.bal=s.open+s.debit-s.pay-s.ret-s.disc;return s}
 const toast=m=>{const t=$('toast');t.textContent=m;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),2600)};
 const stat=(l,v,c='',sub='')=>`<div class="stat ${c}"><span>${l}</span><strong>${v}</strong>${sub?`<small>${sub}</small>`:''}</div>`;
 const sum=(L,k)=>L.reduce((a,p)=>a+stats(p.id)[k],0);
 
 function dueInfo(d){const days=Math.round((new Date(d+'T00:00:00')-new Date(new Date().toDateString()))/864e5);return days<0?`<span class="late">متأخر ${fm.format(-days)} يوم</span>`:days===0?'<span class="soon">اليوم</span>':`<span class="${days<=7?'soon':''}">بعد ${fm.format(days)} يوم</span>`}
+const bt=(st,i,l,c='secondary')=>`<button class="${c} sm" data-st="${st}" data-id="${i}">${l}</button> `;
+const actFor=(t,sp)=>{const i=t.id,s=t.cheque_status;if(s==='endorsed')return'';const done=bt('cleared',i,sp?'تم الصرف':'تم التحصيل','ok')+bt('bounced',i,'مرتد','danger');
+ if(s==='pending')return(sp?'':bt('deposited',i,'إيداع بالبنك')+`<button class="secondary sm" data-end="${i}">تظهير لمورد</button> `)+done;
+ if(s==='deposited')return done+bt('pending',i,'إرجاع للحافظة');return bt('pending',i,sp?'إعادة للانتظار':'إعادة للحافظة')};
 function chqTable(rows,actions,showParty=true){
  if(!rows.length)return'<div class="empty">لا توجد شيكات</div>';
  return`<table><thead><tr><th>الاستحقاق</th>${showParty?'<th>الطرف</th>':''}<th>الشيك</th><th>المبلغ</th><th>الحالة</th><th class="w"></th></tr></thead><tbody>${rows.map(t=>{const p=party(t.customer_id),sp=isSup(p),L=sp?STS:ST;
- const act=!actions?'':t.cheque_status==='pending'?`<button class="ok sm" data-st="cleared" data-id="${t.id}">${sp?'تم الصرف':'تم التحصيل'}</button> <button class="danger sm" data-st="bounced" data-id="${t.id}">مرتد</button>`:`<button class="secondary sm" data-st="pending" data-id="${t.id}">إعادة للانتظار</button>`;
- return`<tr><td class="n">${fd(t.cheque_due_date)}<br>${t.cheque_status==='pending'?dueInfo(t.cheque_due_date):''}</td>${showParty?`<td>${esc(p?.name)}<br><span class="muted">${sp?'مورد':'تاجر'}</span></td>`:''}<td>${esc(t.cheque_no)}<br><span class="muted">${esc(t.cheque_bank||'')}</span></td><td class="n">${money(t.credit)}</td><td><span class="badge b-${t.cheque_status}">${L[t.cheque_status]}</span></td><td class="w n">${act}</td></tr>`}).join('')}</tbody></table>`}
+ const act=!actions?'':actFor(t,sp);
+ return`<tr><td class="n">${fd(t.cheque_due_date)}<br>${OPEN(t)?dueInfo(t.cheque_due_date):''}</td>${showParty?`<td>${esc(p?.name)}<br><span class="muted">${sp?'مورد':'تاجر'}</span></td>`:''}<td>${esc(t.cheque_no)}<br><span class="muted">${esc(t.cheque_bank||'')}</span></td><td class="n">${money(t.credit)}</td><td><span class="badge b-${t.cheque_status}">${L[t.cheque_status]}</span></td><td class="w n">${act}</td></tr>`}).join('')}</tbody></table>`}
 const chqs=()=>tx.filter(t=>t.payment_method==='cheque').sort((a,b)=>a.cheque_due_date.localeCompare(b.cheque_due_date));
 
 function render(){
- const C=parties.filter(p=>!isSup(p)),S=parties.filter(isSup),pend=chqs().filter(t=>t.cheque_status==='pending');
+ const C=parties.filter(p=>!isSup(p)),S=parties.filter(isSup),pend=chqs().filter(OPEN);
  const pc=pend.filter(t=>!isSup(party(t.customer_id))),ps=pend.filter(t=>isSup(party(t.customer_id)));
  const tot=L=>L.reduce((a,t)=>a+N(t.credit),0);
  $('overviewStats').innerHTML=stat('مستحق على التجار',money(sum(C,'bal')),'main red',`${C.length} تاجر`)+stat('مستحق للموردين',money(sum(S,'bal')),'amber',`${S.length} مورد`)+stat('إجمالي التحصيلات',money(sum(C,'pay')),'green')+stat('إجمالي المرتجعات',money(sum(C,'ret')),'','من التجار')+stat('شيكات تحت التحصيل',money(tot(pc)),'',`${pc.length} شيك`)+stat('شيكات مستحقة الصرف',money(tot(ps)),'',`${ps.length} شيك`);
  $('upcoming').innerHTML=chqTable(pend.slice(0,6),false);
  [['customer',C,'customerList','customerSearch'],['supplier',S,'supplierList','supplierSearch']].forEach(([ty,L,box,sb])=>{const q=$(sb).value.trim().toLowerCase();
-  $(box).innerHTML=L.filter(p=>(p.name+' '+(p.phone||'')).toLowerCase().includes(q)).map(p=>{const b=stats(p.id).bal;return`<div class="party"><div><b>${esc(p.name)}</b><div class="muted">${esc(p.phone||'بدون هاتف')} ${p.notes?'· '+esc(p.notes):''}</div></div><div class="actions"><span class="${b>0?(ty==='customer'?'pos':'liab'):'neg'}">${money(Math.abs(b))} <small>${b>0?(ty==='customer'?'عليه':'له'):b<0?(ty==='customer'?'له':'لنا'):''}</small></span><button class="sm" data-open="${p.id}">فتح الدفتر</button></div></div>`}).join('')||`<div class="empty">لا يوجد ${ty==='customer'?'تجار':'موردون'} بعد.</div>`});
- renderCheques();renderCash();renderReports();if(selected&&party(selected.id))openLedger(selected.id,true);
+  $(box).innerHTML=L.filter(p=>(p.name+' '+(p.phone||'')).toLowerCase().includes(q)).map(p=>{const b=stats(p.id).bal;return`<div class="party"><div><b>${esc(p.name)}</b><div class="muted">${esc(p.phone||'بدون هاتف')} ${p.notes?'· '+esc(p.notes):''}</div></div><div class="actions"><span class="${b>0?(ty==='customer'?'pos':'liab'):'neg'}">${money(Math.abs(b))} <small>${b>0?(ty==='customer'?'عليه':'له'):b<0?(ty==='customer'?'له':'لنا'):''}</small></span><button class="sm" data-open="${p.id}">فتح الدفتر</button><button class="secondary sm w" data-edit="${p.id}">تعديل</button>${isOwner()?`<button class="danger sm" data-pdel="${p.id}">حذف</button>`:''}</div></div>`}).join('')||`<div class="empty">لا يوجد ${ty==='customer'?'تجار':'موردون'} بعد.</div>`});
+ renderCheques();renderPortfolio();renderCash();renderReports();if(selected&&party(selected.id))openLedger(selected.id,true);
 }
 function renderCheques(){const ty=$('chqType').value,st=$('chqStatus').value;
- const all=chqs(),rows=all.filter(t=>(!ty||(isSup(party(t.customer_id))?'supplier':'customer')===ty)&&(!st||t.cheque_status===st));
- const od=all.filter(t=>t.cheque_status==='pending'&&t.cheque_due_date<new Date().toISOString().slice(0,10));
+ const all=chqs(),rows=all.filter(t=>(!ty||(isSup(party(t.customer_id))?'supplier':'customer')===ty)&&(!st||(st==='open'?OPEN(t):t.cheque_status===st)));
+ const od=all.filter(t=>OPEN(t)&&t.cheque_due_date<new Date().toISOString().slice(0,10));
  $('chqStats').innerHTML=stat('المعروض',money(rows.reduce((a,t)=>a+N(t.credit),0)),'',`${rows.length} شيك`)+stat('شيكات متأخرة',money(od.reduce((a,t)=>a+N(t.credit),0)),'red',`${od.length} شيك`)+stat('مرتدة',money(all.filter(t=>t.cheque_status==='bounced').reduce((a,t)=>a+N(t.credit),0)),'');
  $('chqTable').innerHTML=chqTable(rows,true)}
 function renderReports(){
@@ -144,7 +151,7 @@ function renderReports(){
 function openLedger(id,keep){selected=party(id);if(!selected)return;if(!keep)tab('ledger');
  const sp=isSup(selected),s=stats(id);let run=s.open;
  $('ledgerTitle').textContent=(sp?'كشف حساب مورد: ':'كشف حساب: ')+selected.name;$('ledgerPhone').textContent=selected.phone||'';$('printTitle').textContent=$('ledgerTitle').textContent+' — '+new Date().toLocaleDateString('ar-EG');
- $('bInv').textContent=sp?'+ فاتورة شراء':'+ فاتورة بيع';$('bPay').textContent=sp?'+ سداد':'+ تحصيل';
+ $('bDelP').classList.toggle('hidden',!isOwner());$('bInv').textContent=sp?'+ فاتورة شراء':'+ فاتورة بيع';$('bPay').textContent=sp?'+ سداد':'+ تحصيل';
  const mp=Object.entries(s.m).filter(([,v])=>v).map(([k,v])=>`${METHODS[k]}: ${money(v)}`).join(' · ');
  $('ledgerStats').innerHTML=stat('رصيد أول المدة',money(s.open))+stat(sp?'إجمالي المشتريات':'إجمالي المبيعات',money(s.debit))+stat(sp?'إجمالي المسدد':'إجمالي التحصيلات',money(s.pay),'green',mp)+stat('إجمالي المرتجعات',money(s.ret),'amber')+stat('إجمالي الخصومات',money(s.disc))+stat('الرصيد الحالي',money(s.bal),'main '+(sp?'amber':'red'),s.pending?`منه شيكات تحت التحصيل ${money(s.pending)}`:'');
  const sorted=[...txFor(id)].sort((a,b)=>a.transaction_date.localeCompare(b.transaction_date)||a.created_at.localeCompare(b.created_at));
@@ -156,7 +163,7 @@ function openLedger(id,keep){selected=party(id);if(!selected)return;if(!keep)tab
 
 const ECATS=['إيجار','رواتب وأجور','كهرباء ومياه','نقل وشحن','صيانة','خامات ومستلزمات','أخرى'],ICATS=['مبيعات نقدية','إيراد آخر'];
 function cashRows(){const r=cash.map(c=>({id:c.id,date:c.entry_date,kind:c.kind,cat:c.category,amount:N(c.amount),method:c.method,desc:c.description,auto:false}));
- tx.forEach(t=>{if(cat(t)!=='pay'||t.cheque_status==='pending'||t.cheque_status==='bounced')return;const p=party(t.customer_id),sp=isSup(p);r.push({date:t.transaction_date,kind:sp?'expense':'income',cat:sp?'سداد لمورد':'تحصيل من تاجر',amount:N(t.credit),method:t.payment_method||'cash',desc:(p?.name||'')+(t.description?' - '+t.description:''),auto:true})});
+ tx.forEach(t=>{if(cat(t)!=='pay'||t.cheque_status&&t.cheque_status!=='cleared')return;const p=party(t.customer_id),sp=isSup(p);r.push({date:t.transaction_date,kind:sp?'expense':'income',cat:sp?'سداد لمورد':'تحصيل من تاجر',amount:N(t.credit),method:t.payment_method||'cash',desc:(p?.name||'')+(t.description?' - '+t.description:''),auto:true})});
  return r.sort((a,b)=>b.date.localeCompare(a.date))}
 function renderCash(){const mi=$('cashMonth');if(!mi.value)mi.value=new Date().toISOString().slice(0,7);const m=mi.value,all=cashRows(),rows=all.filter(r=>r.date.startsWith(m)),sm=(L,k)=>L.filter(r=>r.kind===k).reduce((a,r)=>a+r.amount,0),inc=sm(rows,'income'),exp=sm(rows,'expense');
  $('cashStats').innerHTML=stat('الدخل',money(inc),'green')+stat('المصروف',money(exp),'red')+stat('الصافي',money(inc-exp),'main '+(inc>=exp?'green':'red'));
@@ -170,6 +177,17 @@ function cashForm(){const opt=L=>L.map(c=>`<option>${c}</option>`).join('');
  modal('تسجيل حركة',`<form id="cf"><div class="field"><label>النوع</label><select name="kind" id="ck"><option value="expense">مصروف</option><option value="income">دخل</option></select></div><div class="row"><div class="field"><label>التصنيف</label><select name="category" id="cc">${opt(ECATS)}</select></div><div class="field"><label>المبلغ (ج.م) *</label><input name="amount" type="number" min=".01" step=".01" required></div></div><div class="row"><div class="field"><label>التاريخ</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}" required></div><div class="field"><label>وسيلة الدفع</label><select name="method">${Object.entries(METHODS).filter(([k])=>k!=='cheque').map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></div></div><div class="field"><label>البيان</label><textarea name="description"></textarea></div><button>حفظ</button></form>`);
  $('ck').onchange=e=>$('cc').innerHTML=opt(e.target.value==='income'?ICATS:ECATS);
  $('cf').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);save(client.from('cash_entries').insert({kind:f.get('kind'),category:f.get('category'),amount:N(f.get('amount')),entry_date:f.get('date'),method:f.get('method'),description:f.get('description')})).then(ok=>ok&&toast('تم الحفظ'))}}
+function renderPortfolio(){const L=chqs().filter(t=>t.cheque_status==='pending'&&!isSup(party(t.customer_id))),T=a=>a.reduce((x,t)=>x+N(t.credit),0),td=new Date().toISOString().slice(0,10),w=new Date(Date.now()+7*864e5).toISOString().slice(0,10);
+ $('pfStats').innerHTML=stat('شيكات في الخزينة',money(T(L)),'main',`${L.length} شيك`)+stat('تستحق خلال 7 أيام',money(T(L.filter(t=>t.cheque_due_date>=td&&t.cheque_due_date<=w))),'amber')+stat('متأخرة عن الاستحقاق',money(T(L.filter(t=>t.cheque_due_date<td))),'red');
+ const g={};L.forEach(t=>(g[t.cheque_due_date.slice(0,7)]??=[]).push(t));
+ $('pfBody').innerHTML=Object.keys(g).sort().map(m=>`<h3>${new Date(m+'-01T00:00:00').toLocaleDateString('ar-EG',{month:'long',year:'numeric'})} — ${money(T(g[m]))} (${g[m].length})</h3><div class="tablewrap">${chqTable(g[m],true)}</div>`).join('')||'<div class="empty">لا توجد شيكات في الخزينة</div>'}
+function endorse(id){const t=tx.find(x=>x.id===id),S=parties.filter(isSup);if(!S.length)return alert('أضف مورداً أولاً');
+ modal('تظهير شيك لمورد',`<form id="ef2"><p class="muted">شيك رقم ${esc(t.cheque_no)} بقيمة ${money(t.credit)} من ${esc(party(t.customer_id)?.name)} — استحقاق ${fd(t.cheque_due_date)}. سيُخصم من حساب المورد دون حركة نقدية.</p><div class="field"><label>المورد *</label><select name="s" required>${S.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></div><div class="field"><label>تاريخ التظهير</label><input name="d" type="date" value="${new Date().toISOString().slice(0,10)}" required></div><button>تأكيد التظهير</button></form>`);
+ $('ef2').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);const {error}=await client.from('transactions').insert({customer_id:f.get('s'),kind:'سداد',debit:0,credit:t.credit,transaction_date:f.get('d'),description:'شيك مظهّر من '+(party(t.customer_id)?.name||''),payment_method:'cheque',cheque_no:t.cheque_no,cheque_bank:t.cheque_bank,cheque_due_date:t.cheque_due_date,cheque_status:'endorsed'});if(error)return alert(error.message);const u=await client.from('transactions').update({cheque_status:'endorsed'}).eq('id',id);if(u.error)return alert(u.error.message);closeModal();await loadData();toast('تم تظهير الشيك')}}
+function editParty(id){const p=party(id);if(!p)return;modal(isSup(p)?'تعديل مورد':'تعديل تاجر',`<form id="ep"><div class="field"><label>الاسم *</label><input name="name" required value="${esc(p.name)}"></div><div class="row"><div class="field"><label>رقم الهاتف</label><input name="phone" value="${esc(p.phone||'')}"></div><div class="field"><label>رصيد أول المدة (ج.م)</label><input name="ob" type="number" step=".01" value="${N(p.opening_balance)}"></div></div><div class="field"><label>ملاحظات</label><textarea name="notes">${esc(p.notes||'')}</textarea></div><button>حفظ التعديلات</button></form>`);
+ $('ep').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);save(client.from('customers').update({name:f.get('name'),phone:f.get('phone'),opening_balance:N(f.get('ob')),notes:f.get('notes')}).eq('id',id)).then(ok=>ok&&toast('تم التعديل'))}}
+async function delParty(id){const p=party(id),n=txFor(id).length;if(!p||!confirm(`حذف "${p.name}" نهائياً؟${n?`\nسيتم أيضاً حذف ${n} عملية مسجلة عليه.`:''}\nلا يمكن التراجع.`))return;
+ const {error}=await client.from('customers').delete().eq('id',id);if(error)return alert(error.message);if(selected?.id===id)selected=null;await loadData();tab(isSup(p)?'suppliers':'customers');toast('تم الحذف')}
 function tab(n){$('tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.tab===n));TABS.forEach(([k])=>$(k+'Tab').classList.toggle('hidden',k!==n))}
 $('tabs').innerHTML=TABS.map(([k,l])=>`<button data-tab="${k}">${l}</button>`).join('');
 const modal=(t,h)=>{$('modalTitle').textContent=t;$('modalBody').innerHTML=h;$('modal').classList.remove('hidden')},closeModal=()=>$('modal').classList.add('hidden');
@@ -198,10 +216,11 @@ function payment(){const sp=isSup(selected);
   save(client.from('transactions').insert(rows)).then(ok=>ok&&toast('تم تسجيل الدفعة'))}}
 
 document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
- if(d.tab)tab(d.tab);else if(d.open)openLedger(d.open);else if(d.add)addParty(d.add);else if(d.cash)cashForm();
+ if(d.tab)tab(d.tab);else if(d.open)openLedger(d.open);else if(d.add)addParty(d.add);else if(d.edit)editParty(d.edit);else if(d.pdel)delParty(d.pdel);else if(d.end)endorse(d.end);else if(d.cash)cashForm();
  else if(d.cdel&&confirm('حذف هذه الحركة؟')){const {error}=await client.from('cash_entries').delete().eq('id',d.cdel);if(error)return alert(error.message);await loadData();toast('تم الحذف')}
  else if(d.st){const {error}=await client.from('transactions').update({cheque_status:d.st}).eq('id',d.id);if(error)return alert(error.message);await loadData();toast('تم تحديث حالة الشيك')}
  else if(d.del&&confirm('حذف هذه العملية نهائياً؟')){const {error}=await client.from('transactions').delete().eq('id',d.del);if(error)return alert(error.message);await loadData();toast('تم الحذف')}});
+$('bEdit').onclick=()=>editParty(selected.id);$('bDelP').onclick=()=>delParty(selected.id);
 $('bInv').onclick=()=>entry('inv');$('bPay').onclick=payment;$('bRet').onclick=()=>entry('ret');$('bDisc').onclick=()=>entry('disc');
  $('cashMonth').onchange=renderCash;
 $('closeModal').onclick=closeModal;$('modal').onclick=e=>{if(e.target===$('modal'))closeModal()};$('printBtn').onclick=()=>window.print();
@@ -213,7 +232,7 @@ async function boot(){try{const {data:{user}}=await client.auth.getUser();if(!us
  $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('userArea').classList.remove('hidden');$('userEmail').textContent=user.email.replace('@joker2000.app','');
  const {data}=await client.from('profiles').select('*').eq('id',user.id).single();profile=data;
  $('roleBadge').textContent={owner:'مدير',accountant:'محاسب',staff:'مستخدم (عرض فقط)'}[profile?.role]||'';document.body.classList.toggle('ro',!canW());
- await loadData();tab('overview')}catch(e){alert('تعذر تحميل البيانات: '+e.message+'\nتأكد من تشغيل ملفي migration-v2.sql و migration-v3.sql')}}
+ await loadData();tab('overview')}catch(e){alert('تعذر تحميل البيانات: '+e.message+'\nتأكد من تشغيل ملفي migration-v2 و v3 و v4')}}
 function showLogin(){$('loginView').classList.remove('hidden');$('appView').classList.add('hidden');$('userArea').classList.add('hidden')}
 const toEmail=v=>{v=v.trim().toLowerCase();return v.includes('@')?v:v+'@joker2000.app'};
 const msg=s=>$('loginMsg').textContent=s;
