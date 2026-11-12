@@ -48,9 +48,9 @@ th{color:var(--muted);font-weight:600;background:#f8f9fb;white-space:nowrap}td.n
 
 <section id="loginView" class="login">
 <h2>تسجيل الدخول</h2>
-<div class="field"><label>البريد الإلكتروني</label><input id="email" type="email" autocomplete="username"></div>
+<div class="field"><label>اسم المستخدم</label><input id="email" type="text" autocomplete="username" autocapitalize="none" dir="ltr"></div>
 <div class="field"><label>كلمة المرور</label><input id="password" type="password" autocomplete="current-password"></div>
-<div class="actions"><button id="loginBtn">دخول</button><button class="secondary" id="signupBtn">إنشاء حساب</button></div>
+<div class="actions"><button id="loginBtn">دخول</button></div>
 <p id="loginMsg" class="muted"></p>
 </section>
 
@@ -186,14 +186,14 @@ $('closeModal').onclick=closeModal;$('modal').onclick=e=>{if(e.target===$('modal
 async function loadData(){const [c,t]=await Promise.all([client.from('customers').select('*').order('name'),client.from('transactions').select('*').order('transaction_date').order('created_at')]);
  if(c.error||t.error)throw(c.error||t.error);parties=c.data||[];tx=t.data||[];render()}
 async function boot(){try{const {data:{user}}=await client.auth.getUser();if(!user)return showLogin();
- $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('userArea').classList.remove('hidden');$('userEmail').textContent=user.email;
+ $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('userArea').classList.remove('hidden');$('userEmail').textContent=user.email.replace('@joker2000.app','');
  const {data}=await client.from('profiles').select('*').eq('id',user.id).single();profile=data;
  $('roleBadge').textContent={owner:'مدير',accountant:'محاسب',staff:'مستخدم (عرض فقط)'}[profile?.role]||'';document.body.classList.toggle('ro',!canW());
  await loadData();tab('overview')}catch(e){alert('تعذر تحميل البيانات: '+e.message+'\nتأكد من تشغيل ملف migration-v2.sql')}}
 function showLogin(){$('loginView').classList.remove('hidden');$('appView').classList.add('hidden');$('userArea').classList.add('hidden')}
+const toEmail=v=>{v=v.trim().toLowerCase();return v.includes('@')?v:v+'@joker2000.app'};
 const msg=s=>$('loginMsg').textContent=s;
-$('loginBtn').onclick=async()=>{const {error}=await client.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)return msg(error.message);boot()};
-$('signupBtn').onclick=async()=>{const {data,error}=await client.auth.signUp({email:$('email').value,password:$('password').value});if(error)return msg(error.message);msg(data.session?'تم إنشاء الحساب':'تم إرسال رسالة تأكيد البريد الإلكتروني.')};
+$('loginBtn').onclick=async()=>{const {error}=await client.auth.signInWithPassword({email:toEmail($('email').value),password:$('password').value});if(error)return msg(error.message);boot()};
 $('logoutBtn').onclick=async()=>{await client.auth.signOut();showLogin()};
 client.auth.onAuthStateChange((_e,s)=>{if(!s)showLogin()});
 boot();
